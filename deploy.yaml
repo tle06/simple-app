@@ -10,6 +10,7 @@ spec:
     - port: 80
       targetPort: 8080
       protocol: TCP
+      nodePort: 32000
       name: meetup-app
   selector:
     app: meetup-app
