@@ -1,5 +1,5 @@
 #test comment for webhook - new
-FROM golang:latest
+FROM golang:alpine
 WORKDIR /go/src/github.com/mchmarny/simple-app/
 COPY . .
 RUN CGO_ENABLED=0 go build -v -o app
