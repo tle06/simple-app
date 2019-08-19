@@ -1,3 +1,4 @@
+#test comment for webhook
 FROM golang:latest
 WORKDIR /go/src/github.com/mchmarny/simple-app/
 COPY . .
