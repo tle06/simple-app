@@ -1,5 +1,4 @@
-#test comment for webhook - new comment - again
-#one more comment - one more
+#test comment for webhook - testing deployment
 FROM golang:alpine
 WORKDIR /go/src/github.com/mchmarny/simple-app/
 COPY . .
