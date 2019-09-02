@@ -27,6 +27,12 @@ jobs:
     - name: Build
       run: go build -v .
 
+    - name: Setup python
+      uses: actions/setup-python@v1 
+      with:
+        python-version: '3.x'
+        architecture: 'x64'
+
     - name: Get kubeconfig
       uses: ventus-ag/vks-action@master
       with: 
