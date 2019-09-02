@@ -26,3 +26,14 @@ jobs:
 
     - name: Build
       run: go build -v .
+
+    - name: Get kubeconfig
+      uses: ventus-ag/vks-action@master
+      with: 
+        authUrl: ${{ secrets.AUTHURL }}
+        projectName: ${{ secrets.PROJECTNAME }}
+        domainName: ${{ secrets.DOMAINNAME }}
+        userName: ${{ secrets.USERNAME }}
+        userDomainName: ${{ secrets.USERDOMAINNAME }}
+        userPassword: ${{ secrets.USERPASSWORD }}
+        clusterName: ${{ secrets.CLUSTERNAME }}
