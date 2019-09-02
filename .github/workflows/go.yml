@@ -34,7 +34,7 @@ jobs:
         architecture: 'x64'
 
     - name: Get kubeconfig
-      uses: TenSt/vks-action@master
+      uses: ventus-ag/vks-action@master
       with: 
         authUrl: ${{ secrets.AUTHURL }}
         projectName: ${{ secrets.PROJECTNAME }}
