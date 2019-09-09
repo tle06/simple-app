@@ -11,7 +11,7 @@ jobs:
       run: |
         sha=${GITHUB_SHA:0:7}
         app="${GITHUB_REPOSITORY#*/}"
-        docker build -t secrets.REGISTRY_USERNAME/$app:$sha .
+        docker build -t ${{ secrets.REGISTRY_USERNAME }}/$app:$sha .
     - name: Push
       run: |
         sha=${GITHUB_SHA:0:7}
