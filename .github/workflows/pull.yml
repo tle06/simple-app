@@ -17,9 +17,10 @@ jobs:
         sha=${GITHUB_SHA:0:7}
         app="${GITHUB_REPOSITORY#*/}"
         docker login -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }}
-        docker push secrets.REGISTRY_USERNAME/$app:$sha
+        docker push ${{ secrets.REGISTRY_USERNAME }}/$app:$sha
 #deploy to Kubernetes
   deploy:
+    needs: build
     runs-on: ubuntu-latest
     steps:
     - name: Set context
@@ -33,7 +34,7 @@ jobs:
       run: |
         sha=${GITHUB_SHA:0:7}
         app="${GITHUB_REPOSITORY#*/}"
-        kubectl create deployment $app --image=secrets.REGISTRY_USERNAME/$app:$sha -n $GITHUB_SHA --dry-run -o yaml | kubectl apply -f -
+        kubectl create deployment $app --image=${{ secrets.REGISTRY_USERNAME }}/$app:$sha -n $GITHUB_SHA --dry-run -o yaml | kubectl apply -f -
         kubectl expose deployment $app --type=LoadBalancer
     - name: Test
       run: |
