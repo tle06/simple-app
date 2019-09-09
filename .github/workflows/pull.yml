@@ -35,10 +35,7 @@ jobs:
         sha=${GITHUB_SHA:0:7}
         app=${GITHUB_REPOSITORY#*/}
         kubectl create deployment $app --image=${{ secrets.REGISTRY_USERNAME }}/$app:$sha -n $GITHUB_SHA --dry-run -o yaml | kubectl apply -f -
-    - name: Expose
-      run: |
-        app=${GITHUB_REPOSITORY#*/}
-        kubectl expose deployment $app --type=LoadBalancer
+        kubectl expose deployment $app --type=LoadBalancer -n $GITHUB_SHA
     - name: Test
       run: |
         while true; do
