@@ -1,0 +1,54 @@
+name: Pull Request
+on: [pull_request]
+
+jobs:
+#building app
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build
+      run: |
+        sha=${GITHUB_SHA:0:7}
+        app="${GITHUB_REPOSITORY#*/}"
+        docker build -t secrets.REGISTRY_USERNAME/$app:$sha .
+    - name: Push
+      run: |
+        sha=${GITHUB_SHA:0:7}
+        app="${GITHUB_REPOSITORY#*/}"
+        docker login -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }}
+        docker push secrets.REGISTRY_USERNAME/$app:$sha
+#deploy to Kubernetes
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Set context
+      uses: azure/k8s-actions/k8s-set-context@master
+      with:
+        kubeconfig: ${{ secrets.KUBE_CONFIG }}
+    - name: Create Namespace
+      run: |
+        kubectl create namespace $GITHUB_SHA --dry-run -o yaml | kubectl apply -f -
+    - name: Deployment
+      run: |
+        sha=${GITHUB_SHA:0:7}
+        app="${GITHUB_REPOSITORY#*/}"
+        kubectl create deployment $app --image=secrets.REGISTRY_USERNAME/$app:$sha -n $GITHUB_SHA --dry-run -o yaml | kubectl apply -f -
+        kubectl expose deployment $app --type=LoadBalancer
+    - name: Test
+      run: |
+        while true; do
+          ip=$(kubectl get svc $app -n $GITHUB_SHA -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+          if [ -z "$ip" ]
+          then
+            echo "Waiting to get EXTERNAL-IP"
+          else
+            echo $ip
+            break
+          fi
+          sleep 10
+        done
+        curl $ip
+    - name: Delete namespace after successful test
+      run: |
+        kubectl delete ns $GITHUB_SHA
