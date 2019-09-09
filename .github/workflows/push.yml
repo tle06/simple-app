@@ -1,0 +1,50 @@
+name: Pull Request
+on: [push]
+
+jobs:
+#building app
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build
+      run: |
+        sha=${GITHUB_SHA:0:7}
+        app="${GITHUB_REPOSITORY#*/}"
+        docker build -t ${{ secrets.REGISTRY_USERNAME }}/$app:$sha .
+    - name: Push
+      run: |
+        sha=${GITHUB_SHA:0:7}
+        app=${GITHUB_REPOSITORY#*/}
+        docker login -u ${{ secrets.REGISTRY_USERNAME }} -p ${{ secrets.REGISTRY_PASSWORD }}
+        docker push ${{ secrets.REGISTRY_USERNAME }}/$app:$sha
+#deploy to Kubernetes
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Set context
+      uses: azure/k8s-actions/k8s-set-context@master
+      with:
+        kubeconfig: ${{ secrets.KUBE_CONFIG }}
+    - name: Deployment
+      run: |
+        sha=${GITHUB_SHA:0:7}
+        app=${GITHUB_REPOSITORY#*/}
+        kubectl run $app --generator=run-pod/v1 --image=${{ secrets.REGISTRY_USERNAME }}/$app:$sha --port=8080 --dry-run -o yaml | kubectl apply -f -
+        kubectl expose pod $app --port=80 --target-port=8080 --type=LoadBalancer --dry-run -o yaml | kubectl apply -f -
+    - name: Test
+      run: |
+        app=${GITHUB_REPOSITORY#*/}
+        while true; do
+          ip=$(kubectl get svc $app -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+          if [ -z "$ip" ]
+          then
+            echo "Waiting to get EXTERNAL-IP"
+          else
+            echo $ip
+            break
+          fi
+          sleep 10
+        done
+        curl $ip
