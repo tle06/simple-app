@@ -29,13 +29,14 @@ jobs:
         kubeconfig: ${{ secrets.KUBE_CONFIG }}
     - name: Create Namespace
       run: |
-        kubectl create namespace $GITHUB_SHA --dry-run -o yaml | kubectl apply -f -
+        echo $GITHUB_SHA
+        kubectl create namespace $GITHUB_SHA
     - name: Deployment
       run: |
         sha=${GITHUB_SHA:0:7}
         app=${GITHUB_REPOSITORY#*/}
         echo $GITHUB_SHA
-        kubectl create deployment $app --image=${{ secrets.REGISTRY_USERNAME }}/$app:$sha --port=8080 -n $GITHUB_SHA --dry-run -o yaml | kubectl apply -f -
+        kubectl run $app --generator=run-pod/v1 --image=${{ secrets.REGISTRY_USERNAME }}/$app:$sha --port=8080 -n $GITHUB_SHA
         kubectl expose deployment $app --port=80 --target-port=8080 --type=LoadBalancer -n $GITHUB_SHA
     - name: Test
       run: |
