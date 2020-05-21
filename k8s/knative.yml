@@ -4,7 +4,7 @@ metadata:
   name: simple # The name of the app
   namespace: default
   annotations:
-    subdomain: simple5
+    subdomain: simple6
 spec:
   template:
     spec:
