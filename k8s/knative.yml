@@ -1,0 +1,12 @@
+apiVersion: serving.knative.dev/v1 # Current version of Knative
+kind: Service
+metadata:
+  name: simple # The name of the app
+  namespace: default
+  annotations:
+    subdomain: simple
+spec:
+  template:
+    spec:
+      containers:
+        - image: registry.tlnk.fr/library/simple-app
