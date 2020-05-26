@@ -9,4 +9,4 @@ spec:
   template:
     spec:
       containers:
-        - image: registry.tlnk.fr/library/simple-app
+        - image: registry.gitlab.com/tle06/simple-app
